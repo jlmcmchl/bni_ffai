@@ -69,7 +69,71 @@ var allTeams = [
     "frc888"
 ];
 
+var entrants = [{
+    name : 'BNI',
+    position : 0,
+    picks : []
+},{
+    name : 'WHR1',
+    position : 0,
+    picks : []
+},{
+    name : 'BB',
+    position : 0,
+    picks : []
+},{
+    name : 'TLC',
+    position : 0,
+    picks : []
+},{
+    name : 'AB',
+    position : 0,
+    picks : []
+},{
+    name : 'ELO',
+    position : 0,
+    picks : []
+},{
+    name : 'TFP',
+    position : 0,
+    picks : []
+},{
+    name : 'TMQD',
+    position : 0,
+    picks : []
+},{
+    name : 'UL',
+    position : 0,
+    picks : []
+},{
+    name : 'AC',
+    position : 0,
+    picks : []
+},{
+    name : 'WHY',
+    position : 0,
+    picks : []
+},{
+    name : 'DPR',
+    position : 0,
+    picks : []
+},{
+    name : 'SD',
+    position : 0,
+    picks : []
+},{
+    name : 'IG',
+    position : 0,
+    picks : []
+}];
+
 $(document).ready(function(){
+    updateRemainingTeams();
+    updatePicks();
+    runDraft();
+});
+
+var updateRemainingTeams = function updateRemainingTeams(){
     var template = $('#remaining_teams_template').text();
     
     trimmedTeams = _.map(allTeams, function(t){
@@ -85,9 +149,29 @@ $(document).ready(function(){
     });
 
     $('.remaining_teams_list').html(compiled({teams : actualTeams}));
-});
+}
 
+var updatePicks = function updatePicks(){
+    var template = $('#picks_template').text();
+
+    compiled = _.template(template);
+
+    entrants = _.sortBy(entrants,[function(e){
+        return e.position;
+    }]);
+
+    $('.picks_table tbody').html(compiled({entrants : entrants}));
+}
 
 var getRealTeam = function(team, allTeams){
     return _.find(window.teamStrength, function(t){ return t.team == team});
+}
+
+var runDraft = function runDraft(){
+    ordering = Array.from({length: entrants.length}, () => Math.floor(Math.random() * entrants.length));
+    for(i = 0; i < entrants.length; i++){
+        entrants[i].position = ordering[i];
+    }
+    updatePicks();
+    console.log(entrants);
 }
