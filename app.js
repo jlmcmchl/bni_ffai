@@ -220,9 +220,10 @@ var runDraft = function runDraft(t){
     teamPicked = getRealTeam(t);
     entrants[OTC].picks.push(teamPicked);
     _.pull(allTeams, Number(t));
-    if(OTC == entrants.length - 1){
+    if((OTC == entrants.length - 1 && round != 2) || (OTC == 0 && round == 2)){
         round++;
-        OTC = 0;
+    } else if(round == 2){
+        OTC--;
     } else {
         OTC++;
     }
