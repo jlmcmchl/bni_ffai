@@ -18,8 +18,12 @@
             <div class="messages">
                 <div class="message -left">
                     <i class="nes-bcrikko"></i>
-                    <div class="nes-balloon from-left">
+                    <div class="message_balloon nes-balloon from-left">
                         <p>It's your pick!</p>
+                    </div>
+                    <div class="nes-field">
+                            <label for="pick_field">your pick</label>
+                            <input type="text" id="pick_field" class="nes-input">
                     </div>
                 </div>
             </div>
@@ -30,96 +34,19 @@
                 <table class="picks_table nes-table is-bordered is-centered">
                     <thead>
                         <tr>
-                            <th>Team</th>
+                            <th>team</th>
                             <th>round 1</th>
                             <th>round 2</th>
                             <th>round 3</th>
+                            <th>score</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>BNI</td>
-                            <td>1</td>
-                            <td>2</td>
-                            <td>3</td>
-                        </tr>
-                        <tr>
-                            <td>WHR1</td>
-                            <td>1</td>
-                            <td>2</td>
-                            <td>3</td>
-                        </tr>
-                        <tr>
-                            <td>BB</td>
-                            <td>1</td>
-                            <td>2</td>
-                            <td>3</td>
-                        </tr>
-                        <tr>
-                            <td>TLC</td>
-                            <td>1</td>
-                            <td>2</td>
-                            <td>3</td>
-                        </tr>
-                        <tr>
-                            <td>AB</td>
-                            <td>1</td>
-                            <td>2</td>
-                            <td>3</td>
-                        </tr>
-                        <tr>
-                            <td>ELO</td>
-                            <td>1</td>
-                            <td>2</td>
-                            <td>3</td>
-                        </tr>
-                        <tr>
-                            <td>TFP</td>
-                            <td>1</td>
-                            <td>2</td>
-                            <td>3</td>
-                        </tr>
-                        <tr>
-                            <td>TMQD</td>
-                            <td>1</td>
-                            <td>2</td>
-                            <td>3</td>
-                        </tr>
-                        <tr>
-                            <td>UL</td>
-                            <td>1</td>
-                            <td>2</td>
-                            <td>3</td>
-                        </tr>
-                        <tr>
-                            <td>AC</td>
-                            <td>1</td>
-                            <td>2</td>
-                            <td>3</td>
-                        </tr>
-                        <tr>
-                            <td>WHY</td>
-                            <td>1</td>
-                            <td>2</td>
-                            <td>3</td>
-                        </tr>
-                        <tr>
-                            <td>DPR</td>
-                            <td>1</td>
-                            <td>2</td>
-                            <td>3</td>
-                        </tr>
-                        <tr>
-                            <td>SD</td>
-                            <td>1</td>
-                            <td>2</td>
-                            <td>3</td>
-                        </tr>
-                        <tr>
-                            <td>IG</td>
-                            <td>1</td>
-                            <td>2</td>
-                            <td>3</td>
+                            <td>error</td>
+                            <td>MissingNo</td>
+                            <td>MissingNo</td>
+                            <td>MissingNo</td>
                         </tr>
                     </tbody>
                 </table>
@@ -128,7 +55,7 @@
         <section class="nes-container with-title">
             <h2 class="title">teams remaining</h2>
             <ul class="remaining_teams_list nes-list is-disc">
-                <li>1024</li>
+                <li>error</li>
             </ul>
         </section>
     </body>
@@ -143,10 +70,14 @@
         <% _.forEach(entrants, function(entrant) { %>
             <tr>
                 <td><%- entrant.name %></td>
-                <td><%- entrant.picks[0] %></td>
-                <td><%- entrant.picks[1] %></td>
-                <td><%- entrant.picks[2] %></td>
+                <td><% if(!!entrant.picks[0]){ print(entrant.picks[0].team) %> (<% print(entrant.picks[0].elo + ")")  } %></td>
+                <td><% if(!!entrant.picks[1]){ print(entrant.picks[1].team) %> (<% print(entrant.picks[1].elo + ")")  } %></td>
+                <td><% if(!!entrant.picks[2]){ print(entrant.picks[2].team) %> (<% print(entrant.picks[2].elo + ")")  } %></td>
+                <td><%- entrant.score %></td>
             </tr>
         <% }); %>
+    </script>
+    <script id="balloon_template" type="text/template">
+        <p><%- entrant.name %> is on the clock!</p>
     </script>
 </html>

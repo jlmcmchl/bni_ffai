@@ -72,79 +72,100 @@ var allTeams = [
 var entrants = [{
     name : 'BNI',
     position : 0,
-    picks : []
+    picks : [],
+    score : null
 },{
     name : 'WHR1',
     position : 0,
-    picks : []
+    picks : [],
+    score : null
 },{
     name : 'BB',
     position : 0,
-    picks : []
+    picks : [],
+    score : null
 },{
     name : 'TLC',
     position : 0,
-    picks : []
+    picks : [],
+    score : null
 },{
     name : 'AB',
     position : 0,
-    picks : []
+    picks : [],
+    score : null
 },{
     name : 'ELO',
     position : 0,
-    picks : []
+    picks : [],
+    score : null
 },{
     name : 'TFP',
     position : 0,
-    picks : []
+    picks : [],
+    score : null
 },{
     name : 'TMQD',
     position : 0,
-    picks : []
+    picks : [],
+    score : null
 },{
     name : 'UL',
     position : 0,
-    picks : []
+    picks : [],
+    score : null
 },{
     name : 'AC',
     position : 0,
-    picks : []
+    picks : [],
+    score : null
 },{
     name : 'WHY',
     position : 0,
-    picks : []
+    picks : [],
+    score : null
 },{
     name : 'DPR',
     position : 0,
-    picks : []
+    picks : [],
+    score : null
 },{
     name : 'SD',
     position : 0,
-    picks : []
+    picks : [],
+    score : null
 },{
     name : 'IG',
     position : 0,
-    picks : []
+    picks : [],
+    score : null
 }];
 
 $(document).ready(function(){
+    allTeams = _.map(allTeams, function(t){
+        return Number(_.replace(t,'frc',''));
+    });
+
     updateRemainingTeams();
     updatePicks();
-    runDraft();
+    startDraft();
+
+    $('#pick_field').keypress(function(e) {
+        if(e.which == 13) {
+            runDraft($('#pick_field').val());
+            $('#pick_field').val(null);
+        }
+    });
 });
 
 var updateRemainingTeams = function updateRemainingTeams(){
     var template = $('#remaining_teams_template').text();
-    
-    trimmedTeams = _.map(allTeams, function(t){
-        return Number(_.replace(t,'frc',''));
-    });
 
     compiled = _.template(template);
 
-    trimmedTeams.sort((a, b) => a - b);
+    allTeams.sort((a, b) => a - b);
 
-    actualTeams = _.map(trimmedTeams, function(t){
+    actualTeams = _.map(allTeams, function(t){
         return getRealTeam(t);
     });
 
@@ -153,7 +174,6 @@ var updateRemainingTeams = function updateRemainingTeams(){
 
 var updatePicks = function updatePicks(){
     var template = $('#picks_template').text();
-
     compiled = _.template(template);
 
     entrants = _.sortBy(entrants,[function(e){
@@ -163,15 +183,50 @@ var updatePicks = function updatePicks(){
     $('.picks_table tbody').html(compiled({entrants : entrants}));
 }
 
+var updateBalloon = function(e){
+    var template = $('#balloon_template').text();
+    compiled = _.template(template);
+    $('.message_balloon').html(compiled({entrant : entrants[OTC]}));
+}
+
 var getRealTeam = function(team, allTeams){
     return _.find(window.teamStrength, function(t){ return t.team == team});
 }
 
-var runDraft = function runDraft(){
+var startDraft = function startDraft(){
     ordering = Array.from({length: entrants.length}, () => Math.floor(Math.random() * entrants.length));
     for(i = 0; i < entrants.length; i++){
         entrants[i].position = ordering[i];
     }
     updatePicks();
-    console.log(entrants);
+    OTC = 0;
+    updateBalloon();
+}
+
+var OTC = 0;
+var round = 1;
+
+var runDraft = function runDraft(t){
+    if(round == 4){
+        alert("draft complete!");
+        computeScores();
+        return;
+    }
+
+    if(!_.includes(allTeams, Number(t))){
+        alert("team not available!");
+        return;
+    }
+    teamPicked = getRealTeam(t);
+    entrants[OTC].picks.push(teamPicked);
+    _.pull(allTeams, Number(t));
+    if(OTC == entrants.length - 1){
+        round++;
+        OTC = 0;
+    } else {
+        OTC++;
+    }
+    updateRemainingTeams();
+    updatePicks();
+    updateBalloon();
 }
