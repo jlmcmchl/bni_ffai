@@ -230,3 +230,7 @@ var runDraft = function runDraft(t){
     updatePicks();
     updateBalloon();
 }
+
+var computeScores = function computeScores(){
+
+}
