@@ -1,0 +1,131 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="node_modules/normalize.css/normalize.css">
+        <link rel="stylesheet" href="node_modules/nes.css/css/nes.css">
+        <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+        <script src="node_modules/lodash/lodash.js"></script>
+        <script src="node_modules/jquery/dist/jquery.js"></script>
+        <script src="elos.js"></script>
+        <script src="app.js"></script>
+    </head>
+    <body style="margin: 50px;">
+        <header>
+            <h1>BNI ML</h1>
+            <p>Batteries Not Included FFAI entry</p>
+        </header>
+        <div class="nes-container with-title">
+            <h2 class="title">picks</h2>
+            <div class="nes-table-responsive">
+                <table class="nes-table is-bordered is-centered">
+                    <thead>
+                        <tr>
+                            <th>Team</th>
+                            <th>round 1</th>
+                            <th>round 2</th>
+                            <th>round 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>BNI</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>WHR1</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>BB</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>TLC</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>AB</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>ELO</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>TFP</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>TMQD</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>UL</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>AC</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>WHY</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>DPR</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>SD</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>IG</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="nes-container with-title">
+            <h2 class="title">teams remaining</h2>
+            <ul class="remaining_teams_list nes-list is-disc">
+                <li>1024</li>
+            </ul>
+        </div>
+    </body>
+
+    <script id="remaining_teams_template" type="text/template">
+        <% _.forEach(teams, function(team) { %>
+            <li><%- team.team %> (<%- team.elo %>)</li>
+        <% }); %>
+    </script>
+
+</html>
