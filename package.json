@@ -7,6 +7,7 @@
   "license": "n/a",
   "private": true,
   "dependencies": {
+    "brain.js": "^1.6.0",
     "jquery": "^3.3.1",
     "lodash": "^4.17.11",
     "nes.css": "^1.0.0",

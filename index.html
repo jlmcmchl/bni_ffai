@@ -5,8 +5,10 @@
         <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
         <script src="node_modules/lodash/lodash.js"></script>
         <script src="node_modules/jquery/dist/jquery.js"></script>
+        <script src="node_modules/brain.js/browser.js"></script>
         <script src="tbakey.js"></script>
         <script src="app_constants.js"></script>
+        <script src="ml.js"></script>
         <script src="app.js"></script>
     </head>
     <body style="margin: 50px;">
@@ -16,6 +18,10 @@
         </header>
         <section class="balloon nes-container with-title">
             <h2 class="title">information</h2>
+            <div style="float:right;" class="-right">
+                <button type="button" id="train_btn" class="nes-btn is-primary -right">train</button>
+                <button type="button" id="nn_pick_btn" class="nes-btn is-error -right">have NN pick</button>
+            </div>
             <div class="messages">
                 <div class="message -left">
                     <i class="nes-bcrikko"></i>
@@ -64,18 +70,18 @@
 
     <script id="remaining_teams_template" type="text/template">
         <% _.forEach(teams, function(team) { %>
-            <li><%- team.team %> (<%- team.elo %>)</li>
+            <li><%- team.team %> (<%- team.elo %>) (<%- team.predicted %>)</li>
         <% }); %>
     </script>
     
     <script id="picks_template" type="text/template">
         <% _.forEach(entrants, function(entrant) { %>
             <tr>
-                <td><%- entrant.name %></td>
-                <td><% if(!!entrant.picks[0]){ print(entrant.picks[0].team) %> (<% print(entrant.picks[0].elo + ")")  } %></td>
-                <td><% if(!!entrant.picks[1]){ print(entrant.picks[1].team) %> (<% print(entrant.picks[1].elo + ")")  } %></td>
-                <td><% if(!!entrant.picks[2]){ print(entrant.picks[2].team) %> (<% print(entrant.picks[2].elo + ")")  } %></td>
-                <td><%- entrant.score %></td>
+                <td><%- entrant.position %>. <%- entrant.name %></td>
+                <td><% if(!!entrant.picks[0]){ print(entrant.picks[0].team + " (" + entrant.picks[0].elo + ")") } %></td>
+                <td><% if(!!entrant.picks[1]){ print(entrant.picks[1].team + " (" + entrant.picks[1].elo + ")") } %></td>
+                <td><% if(!!entrant.picks[2]){ print(entrant.picks[2].team + " (" + entrant.picks[2].elo + ")") } %></td>
+                <td><%- entrant.score %> [<%- entrant.predicted %>]</td>
             </tr>
         <% }); %>
     </script>
