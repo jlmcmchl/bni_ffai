@@ -1,0 +1,3 @@
+[submodule "brain.js"]
+	path = brain.js
+	url = git@github.com:BrainJS/brain.js.git

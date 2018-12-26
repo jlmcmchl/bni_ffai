@@ -1,14 +1,36 @@
 window.nn = new brain.NeuralNetwork();
 
-window.train = function train(){
-    trainingData = loadData([2016,2017,2018]);
-    console.log(trainingData);
+var step = 0;
+var maxSteps = 0;
+var progress = 0;
+var maxProgress = 0;
+
+
+window.train = async function train(){
+    years = [2016,2017,2018];
+    // years = [2016];
+    maxSteps = years.length + 1;
     var t0 = performance.now();
-    nn.train(trainingData, {
-        log : true
+
+    loadData(years).then(function(trainingData){
+        console.log(trainingData);
+        maxProgress = 20000;
+        step++;
+        nn.trainAsync(trainingData, {
+            log : async function(data){
+                fixedData = _.split(data,',');
+                thingie = _.split(fixedData[0],':')[1];
+                progress = _.trim(thingie);
+                //console.log(progress);
+                redrawProgress();
+            },
+            logPeriod : 100
+        }).then(res => {
+            console.log(res);
+            var t1 = performance.now();
+            console.log("training took " + ((t1 - t0)/1000) + " seconds.");    
+        })
     });
-    var t1 = performance.now();
-    console.log("training took " + ((t1 - t0)/1000) + " seconds.")
 }
 
 var MAX_DP = 154;
@@ -18,10 +40,12 @@ var MIN_ELO = 1346;
 var MAX_ELO_RANK = 40;
 
 
-var loadData = function loadData(years){
+loadData = async function loadData(years){
     trainingData = [];
 
-    years.forEach(function(year){
+
+    for(const year of years){
+        step++;
         elosForYear = _.map(_.filter(window.teamStrength, function(t){
             return t.year == year;
         }),function(t){
@@ -32,12 +56,19 @@ var loadData = function loadData(years){
         MIN_ELO = _.min(elosForYear);
 
 
-        events = getEventsForYear(year);
+        let events = await getEventsForYear(year);
+        //// for testing and not blowing up TBA
+        // events = [events[0]];
         index = 1;
-        events.forEach(function(e){
-            teams = getTeamsForEvent(e.key);
-            districtPoints = getDistrictPointsForEvent(e.key);
-            awards = getAwardsForEvent(e.key);
+
+        maxProgress = events.length;
+        progress = 0;
+        redrawProgress();
+        await Promise.all(events.map(async (e) => {
+            var districtPoints;
+            var awards;
+            var teams;
+            [districtPoints, awards, teams] = await Promise.all([getDistrictPointsForEvent(e.key),getAwardsForEvent(e.key),getTeamsForEvent(e.key)])
 
             teamElos = []
 
@@ -55,7 +86,7 @@ var loadData = function loadData(years){
                 te.eloRank = i--;
             });
 
-            teamElos.forEach(function(te){
+            teamElos.forEach(async function(te){
                 var trainData = { 
                     input : { 
                             eloR : 0, 
@@ -67,7 +98,7 @@ var loadData = function loadData(years){
                     }
                 }
 
-                points = computePointsForTeam(te.team, districtPoints, awards);
+                points = computePointsForTeam(te.team, districtPoints, awards);                
                 points = (points-MIN_DP)/MAX_DP;
 
                 trainData.input.eloR = Math.max(((MAX_ELO_RANK + 1) - te.eloRank) / MAX_ELO_RANK,0);
@@ -76,15 +107,18 @@ var loadData = function loadData(years){
 
                 trainingData.push(trainData);
             });
-            console.log("finished event " + e.key + " - left: " + (events.length - index++))
-        });
-    });
+            progress++;
+            redrawProgress();
+        }));
+        redrawProgress();
+    }
 
-    return trainingData;
+    return Promise.resolve(trainingData);
 }
 
 
 var computePointsForTeam = function computePointsForTeam(t, districtPoints, awards){
+
     var score = 0;
     tbaData = districtPoints["frc" + t];
 
@@ -119,53 +153,43 @@ var computePointsForTeam = function computePointsForTeam(t, districtPoints, awar
     return score;
 }
 
-var getDistrictPointsForEvent = function getDistrictPointsForEvent(eventCode){
+var getDistrictPointsForEvent = async function getDistrictPointsForEvent(eventCode){
     url = "https://www.thebluealliance.com/api/v3/event/" + eventCode + "/district_points";
-    var robotPointsMap;
-    $.ajax({ 'url' : url, async: false }).done(function(data){
-        robotPointsMap = data.points;
-    });
-
-    return robotPointsMap;
+    let data = await $.ajax({ 'url' : url });
+    return Promise.resolve(data.points);
 }
 
-var getAwardsForEvent = function getAwardsForEvent(eventCode){
+var getAwardsForEvent = async function getAwardsForEvent(eventCode){
     url = "https://www.thebluealliance.com/api/v3/event/" + eventCode + "/awards";
-    var awards;
-    $.ajax({ 'url' : url, async: false }).done(function(data){
-        awards = data;
-    });
-    return awards;
+    return $.ajax({ 'url' : url});
 }
 
 
-var getEventsForYear = function getEventsForYear(year){
+var getEventsForYear = async function getEventsForYear(year){
     url = "https://www.thebluealliance.com/api/v3/events/" + year + "/simple";
-    var events;
-
-    $.ajax({ 'url' : url, async: false }).done(function(data){
-        events = data;
-    });
-
-    events = _.filter(events, function(e){
+    let events = await $.ajax({ 'url' : url});
+    filtered = _.filter(events, function(e){
         return e.event_type <= 1;
     });
-    return events;
+    return Promise.resolve(filtered);
 }
 
-var getTeamsForEvent = function getEventsForYear(eventCode){
+var getTeamsForEvent = async function getEventsForYear(eventCode){
     url = "https://www.thebluealliance.com/api/v3/event/" + eventCode + "/teams/keys";
 
-    var teams;
-
-    $.ajax({ 'url' : url, async: false }).done(function(data){
-        
-        teams = _.map(data, function(t){
-            return Number(_.replace(t,'frc',''));
-        });
-        teams.sort((a, b) => a - b);
+    let data = await $.ajax({ 'url' : url });
+    teams = _.map(data, function(t){
+        return Number(_.replace(t,'frc',''));
     });
 
-    return teams;
+    teams.sort((a, b) => a - b);
+
+    return Promise.resolve(teams);
 }
 
+var redrawProgress = async function redrawProgress(){
+    $('#steps').prop('max',maxSteps);
+    $('#progress').prop('max',maxProgress);
+    $('#steps').prop('value',step);
+    $('#progress').prop('value',progress);
+}

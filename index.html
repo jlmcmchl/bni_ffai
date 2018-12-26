@@ -5,11 +5,12 @@
         <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
         <script src="node_modules/lodash/lodash.js"></script>
         <script src="node_modules/jquery/dist/jquery.js"></script>
-        <script src="node_modules/brain.js/browser.js"></script>
+        <script src="brain.js/browser.js"></script>
         <script src="tbakey.js"></script>
         <script src="app_constants.js"></script>
         <script src="ml.js"></script>
         <script src="app.js"></script>
+        <title>BNI ML</title>
     </head>
     <body style="margin: 50px;">
         <header>
@@ -21,6 +22,10 @@
             <div style="float:right;" class="-right">
                 <button type="button" id="train_btn" class="nes-btn is-primary -right">train</button>
                 <button type="button" id="nn_pick_btn" class="nes-btn is-error -right">have NN pick</button>
+                <br>
+                <progress id="steps" class="nes-progress is-success" value="0" max="0"></progress>
+                <progress id ="progress" class="nes-progress is-success" value="0" max="0"></progress>
+                <br>
             </div>
             <div class="messages">
                 <div class="message -left">

@@ -47,6 +47,8 @@ var pollDataForEvent = function pollDataForEvent(eventCode){
         });
         allTeams.sort((a, b) => a - b);
         
+        teamElos = [];
+
         allTeams.forEach(function(t){
             realTeam = getRealTeam(t,year);
             teamElos.push(realTeam);
