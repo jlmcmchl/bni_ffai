@@ -6,6 +6,8 @@ var maxSteps = 0;
 var progress = 0;
 var maxProgress = 0;
 
+const MAX_ITERATIONS = 20000;
+
 window.train2 = async function train2(){
     let allData = [];
 
@@ -33,7 +35,7 @@ window.train2 = async function train2(){
         let validateData = _.difference(allData,trainData);
 
 
-        maxProgress = 20000;
+        maxProgress = MAX_ITERATIONS;
         step++;
         nn2.trainAsync(trainData, {
             log : async function(data){
@@ -43,7 +45,8 @@ window.train2 = async function train2(){
                 console.log(data);
                 redrawProgress();
             },
-            logPeriod : 100
+            logPeriod : MAX_ITERATIONS/20,
+            iterations : MAX_ITERATIONS
         }).then(async res => {
             console.log(res);
             await validateNN2(validateData);
@@ -56,7 +59,8 @@ window.train2 = async function train2(){
                     console.log(data);
                     redrawProgress();
                 },
-                logPeriod : 100
+                logPeriod : MAX_ITERATIONS/20,
+                iterations : MAX_ITERATIONS
             }).then(async res2 =>{
                 console.log(res2);
             });
@@ -74,7 +78,7 @@ window.train = async function train(){
 
     loadData(years).then(function(trainingData){
         console.log(trainingData);
-        maxProgress = 20000;
+        maxProgress = MAX_ITERATIONS;
         step++;
         nn.trainAsync(trainingData, {
             log : async function(data){
@@ -84,12 +88,13 @@ window.train = async function train(){
                 //console.log(progress);
                 redrawProgress();
             },
-            logPeriod : 100
+            logPeriod : MAX_ITERATIONS/20,
+            iterations : MAX_ITERATIONS
         }).then(res => {
             loadData(validateYears).then(async validationTrainingData => {
                 await validateNN(validationTrainingData);
                 finalTrainingData = _.union(trainingData,validationTrainingData)
-                maxProgress = 20000;
+                maxProgress = MAX_ITERATIONS;
                 progress = 0;
                 nn.trainAsync(finalTrainingData, {
                     log : async function(data){
@@ -99,7 +104,8 @@ window.train = async function train(){
                         //console.log(progress);
                         redrawProgress();
                     },
-                    logPeriod : 100
+                    logPeriod : MAX_ITERATIONS/20,
+                    iterations : MAX_ITERATIONS
                 }).then(res2 =>{
                     console.log(res2);
                     var t2 = performance.now();
