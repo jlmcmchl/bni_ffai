@@ -23683,7 +23683,7 @@ window.teamStrength = [{ team : 7331, elo : 1450, year :  2016 },
     { team : 4, elo : 1559, year :  2019 },
     { team : 1, elo : 1564, year :  2019 }];
 
-window.awardPoints = [{awardType : 0, points : 60},
+window.awardPointMappings = [{awardType : 0, points : 60},
     {awardType : 1, points : 0},
     {awardType : 2, points : 0},
     {awardType : 3, points : 10},
@@ -23756,86 +23756,10 @@ window.awardPoints = [{awardType : 0, points : 60},
     {awardType : 70, points : 5},
     {awardType : 71, points : 20}];
 
+window.entrantNames = ['Falcon','1.21 GW','Questionable Decisionmakers','The Breakfast Company','The Lunch Company','CHS Hype Squad','Salty Spitoon','Mechabytes','QwEST','Justin and the Silver Medalists','Flux Capacity','FIRST Pick','The Good Attempt','TSIMFD','The Dinner Company','The Lawnmowers','WHR1','BrebBot','The Most Questionable Decisionmaker','Team Lean Cuisine','AmonBot','Eloquence','The Final Pick','UltraLazy™','Batteries Not Included','WHY','Demonstrably Perfect Rankings','Slam Dunk','Ignoramus'];
+
 window.entrants = [{
         name : 'BNI',
-        position : 0,
-        picks : [],
-        score : null,
-        predicted : 0
-    },{
-        name : 'WHR1',
-        position : 0,
-        picks : [],
-        score : null,
-        predicted : 0
-    },{
-        name : 'BB',
-        position : 0,
-        picks : [],
-        score : null,
-        predicted : 0
-    },{
-        name : 'TLC',
-        position : 0,
-        picks : [],
-        score : null,
-        predicted : 0
-    },{
-        name : 'AB',
-        position : 0,
-        picks : [],
-        score : null,
-        predicted : 0
-    },{
-        name : 'ELO',
-        position : 0,
-        picks : [],
-        score : null,
-        predicted : 0
-    },{
-        name : 'TFP',
-        position : 0,
-        picks : [],
-        score : null,
-        predicted : 0
-    },{
-        name : 'TMQD',
-        position : 0,
-        picks : [],
-        score : null,
-        predicted : 0
-    },{
-        name : 'UL',
-        position : 0,
-        picks : [],
-        score : null,
-        predicted : 0
-    },{
-        name : 'AC',
-        position : 0,
-        picks : [],
-        score : null,
-        predicted : 0
-    },{
-        name : 'WHY',
-        position : 0,
-        picks : [],
-        score : null,
-        predicted : 0
-    },{
-        name : 'DPR',
-        position : 0,
-        picks : [],
-        score : null,
-        predicted : 0
-    },{
-        name : 'SD',
-        position : 0,
-        picks : [],
-        score : null,
-        predicted : 0
-    },{
-        name : 'IG',
         position : 0,
         picks : [],
         score : null,

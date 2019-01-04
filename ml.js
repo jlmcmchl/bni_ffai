@@ -1,15 +1,75 @@
 window.nn = new brain.NeuralNetwork();
+window.nn2 = new brain.NeuralNetwork();
 
 var step = 0;
 var maxSteps = 0;
 var progress = 0;
 var maxProgress = 0;
 
+window.train2 = async function train2(){
+    let allData = [];
+
+    maxSteps = 3;
+    step++;
+    $.ajax("awards_data.json").then(async data => {
+        let maxProgress = data.input.length;
+        await Promise.all(data.input.map(async function(input, i){
+            progress++;
+            let foo = { 
+                input : { 
+                    elo : ((input[0] - -2.43433633)/7.611593469), 
+                    culture : ((input[1] - -0.581497665)/7.85479998), 
+                    robot : ((input[2] - -0.379056123)/9.487511238), 
+                    misc : ((input[3] - -0.457193077)/8.882426167) 
+                }, 
+                output : { 
+                    ap : ((data.output[i][0] - -0.547436623) / 7.130510732)
+                }
+            };
+            allData.push(foo);
+        })); 
+
+        let trainData = _.sampleSize(allData, allData.length * .8);
+        let validateData = _.difference(allData,trainData);
+
+
+        maxProgress = 20000;
+        step++;
+        nn2.trainAsync(trainData, {
+            log : async function(data){
+                fixedData = _.split(data,',');
+                thingie = _.split(fixedData[0],':')[1];
+                progress = _.trim(thingie);
+                console.log(data);
+                redrawProgress();
+            },
+            logPeriod : 100
+        }).then(async res => {
+            console.log(res);
+            await validateNN2(validateData);
+            finalTrainData = _.union(trainData,validateData)
+            nn2.trainAsync(finalTrainData, {
+                log : async function(data){
+                    fixedData = _.split(data,',');
+                    thingie = _.split(fixedData[0],':')[1];
+                    progress = _.trim(thingie);
+                    console.log(data);
+                    redrawProgress();
+                },
+                logPeriod : 100
+            }).then(async res2 =>{
+                console.log(res2);
+            });
+        })
+    });
+}
+
 
 window.train = async function train(){
-    years = [2016,2017,2018];
-    // years = [2016];
-    maxSteps = years.length + 1;
+    // years = [2016,2017];
+    years = [2016, 2017];
+    validateYears = [2018];
+    maxSteps = years.length + validateYears.length + 3;
     var t0 = performance.now();
 
     loadData(years).then(function(trainingData){
@@ -26,10 +86,31 @@ window.train = async function train(){
             },
             logPeriod : 100
         }).then(res => {
+            loadData(validateYears).then(async validationTrainingData => {
+                await validateNN(validationTrainingData);
+                finalTrainingData = _.union(trainingData,validationTrainingData)
+                maxProgress = 20000;
+                progress = 0;
+                nn.trainAsync(finalTrainingData, {
+                    log : async function(data){
+                        fixedData = _.split(data,',');
+                        thingie = _.split(fixedData[0],':')[1];
+                        progress = _.trim(thingie);
+                        //console.log(progress);
+                        redrawProgress();
+                    },
+                    logPeriod : 100
+                }).then(res2 =>{
+                    console.log(res2);
+                    var t2 = performance.now();
+                    console.log("final training took " + ((t2 - t1)/1000) + " seconds.");  
+                });
+            });
+
             console.log(res);
             var t1 = performance.now();
-            console.log("training took " + ((t1 - t0)/1000) + " seconds.");    
-        })
+            console.log("training took " + ((t1 - t0)/1000) + " seconds.");  
+        });
     });
 }
 
@@ -38,8 +119,44 @@ var MIN_DP = 4;
 var MAX_ELO = 1900;
 var MIN_ELO = 1346;
 var MAX_ELO_RANK = 40;
+var MAX_AP = 85;
+var MIN_AP = 0;
 
 
+validateNN2 = async function validateNN2(trainingData){
+
+    var totalError = 0;
+    progress = 0;
+    maxProgress = trainingData.length;
+    step++;
+    await Promise.all(trainingData.map(async (td) => {
+        predicted = window.nn2.run(td.input).ap
+        actual = td.output.ap;
+        error = 1- Math.abs(predicted - actual);        
+        totalError += error;
+    }));
+
+    accuracy = (totalError) / trainingData.length;
+    alert("Accuracy : " + accuracy + "%");
+}
+
+
+validateNN = async function validateNN(trainingData){
+
+    var totalError = 0;
+    progress = 0;
+    maxProgress = trainingData.length;
+    step++;
+    await Promise.all(trainingData.map(async (td) => {
+        predicted = window.nn.run(td.input).dp
+        actual = td.output.dp;
+        error = 1- Math.abs(predicted - actual);        
+        totalError += error;
+    }));
+
+    accuracy = (totalError) / trainingData.length;
+    alert("Accuracy : " + accuracy + "%");
+}
 loadData = async function loadData(years){
     trainingData = [];
 
@@ -90,8 +207,8 @@ loadData = async function loadData(years){
                 var trainData = { 
                     input : { 
                             eloR : 0, 
-                            elo : 0, 
-                            awardPoints : 0 
+                            elo : 0//, 
+                            //awardPoints : 0 
                         }, 
                     output : {
                         dp : 0
@@ -99,11 +216,15 @@ loadData = async function loadData(years){
                 }
 
                 points = computePointsForTeam(te.team, districtPoints, awards);                
-                points = (points-MIN_DP)/MAX_DP;
+                scaledPoints = (points-MIN_DP)/(MAX_DP-MIN_DP);
+                if(isNaN(scaledPoints)){
+                    console.log("WTFBBQ :" + points + " " + scaledPoints + " " + te.team + " - " + e.key);
+                    return;
+                }
 
                 trainData.input.eloR = Math.max(((MAX_ELO_RANK + 1) - te.eloRank) / MAX_ELO_RANK,0);
                 trainData.input.elo = (te.elo - MIN_ELO) / (MAX_ELO - MIN_ELO);
-                trainData.output.dp = points;
+                trainData.output.dp = scaledPoints;
 
                 trainingData.push(trainData);
             });
@@ -116,13 +237,177 @@ loadData = async function loadData(years){
     return Promise.resolve(trainingData);
 }
 
+var verifiy2 = async function verifiy2(allTrainingData){
+    await allTrainingData;
+
+    allTrainingData.then(async trainingData =>{
+
+        var totalError = 0;
+        progress = 0;
+        maxProgress = trainingData.length;
+        step++;
+        await Promise.all(trainingData.map(async (td) => {
+            predicted = window.nn2.run(td.input.aInput).ap
+            actual = td.output.ap;
+            error = 1- Math.abs(predicted - actual);        
+            totalError += error;
+        }));
+
+        accuracy = (totalError) / trainingData.length;
+        alert("nn2 Accuracy : " + accuracy + "%");
+
+        var totalError = 0;
+        progress = 0;
+        maxProgress = trainingData.length;
+        step++;
+        await Promise.all(trainingData.map(async (td) => {
+            predicted = window.nn.run(td.input.rInput).dp
+            actual = td.output.dp;
+            error = 1- Math.abs(predicted - actual);        
+            totalError += error;
+        }));
+
+        accuracy = (totalError) / trainingData.length;
+        alert("nn1 Accuracy : " + accuracy + "%");
+
+        var totalError = 0;
+        progress = 0;
+        maxProgress = trainingData.length;
+        step++;
+        await Promise.all(trainingData.map(async (td) => {
+            predicted = window.nn.run(td.input.rInput).dp
+            predictedA = window.nn2.run(td.input.aInput).ap
+            actual = td.output.dp;
+            actualA = td.output.ap;
+            error = 1- Math.abs((predicted + predicted) - (actual + actualA));
+            totalError += error;
+        }));
+
+        accuracy = (totalError) / trainingData.length;
+        alert("overall Accuracy : " + accuracy + "%");
+    });
+}
+
+loadData2 = async function loadData2(years){
+    trainingData = [];
+
+
+    for(const year of years){
+        step++;
+        elosForYear = _.map(_.filter(window.teamStrength, function(t){
+            return t.year == year;
+        }),function(t){
+            return t.elo;
+        });
+
+        MAX_ELO = _.max(elosForYear);
+        MIN_ELO = _.min(elosForYear);
+
+
+        let events = await getEventsForYear(year);
+        //// for testing and not blowing up TBA
+        // events = [events[0]];
+        index = 1;
+
+        maxProgress = events.length;
+        progress = 0;
+        redrawProgress();
+        await Promise.all(events.map(async (e) => {
+            let districtPoints;
+            let awards;
+            let teams;
+            [districtPoints, awards, teams] = await Promise.all([getDistrictPointsForEvent(e.key),getAwardsForEvent(e.key),getTeamsForEvent(e.key)])
+
+            let teamElos = []
+
+            teams.forEach(function(t){
+                realTeam = getRealTeam(t,year);
+                teamElos.push(realTeam);
+            });
+
+            teamElos = _.sortBy(teamElos, [function(te){
+                return te.elo;
+            }]);
+
+            let i = teamElos.length;
+            teamElos.forEach(function(te){
+                te.eloRank = i--;
+            });
+
+
+            
+            var awardsData = {};
+            await $.ajax({url : 'real_data.json', async : false}).done(function(data){
+                awardsData=data;
+            });
+
+            await Promise.all(teamElos.map(async function(te){
+                let foo = awardsData.input["frc" + te.team];
+                if(!foo){
+                    foo = [(te.elo - MIN_ELO) / (MAX_ELO - MIN_ELO),0,0,0];
+                }
+                awardsInput = { 
+                    elo : ((foo[0] - -2.43433633)/7.611593469), 
+                    culture : ((foo[1] - -0.581497665)/7.85479998), 
+                    robot : ((foo[2] - -0.379056123)/9.487511238), 
+                    misc : ((foo[3] - -0.457193077)/8.882426167) 
+                };
+
+                var trainData = { 
+                    input : {
+                        rInput : {
+                            eloR : 0, 
+                            elo : 0
+                        },
+                        aInput : {
+                            elo : 0,
+                            culture : 0,
+                            robot : 0,
+                            misc : 0
+                        }
+                    }, 
+                    output : {
+                        dp : 0,
+                        ap : 0
+                    }
+                }
+
+                let points = computePointsForTeam(te.team, districtPoints, awards);                
+                let awardPoints = computeAwardPointsForTeam(te.team, districtPoints, awards);
+                let scaledAwardPoints = (awardPoints-MIN_AP)/(MAX_AP-MIN_AP);
+                let scaledPoints = (points-MIN_DP)/(MAX_DP-MIN_DP);
+                if(isNaN(scaledPoints)){
+                    console.log("WTFBBQ :" + points + " " + scaledPoints + " " + te.team + " - " + e.key);
+                    return;
+                }
+
+                trainData.input.rInput.eloR = Math.max(((MAX_ELO_RANK + 1) - te.eloRank) / MAX_ELO_RANK,0);
+                trainData.input.rInput.elo = (te.elo - MIN_ELO) / (MAX_ELO - MIN_ELO);
+                trainData.input.aInput = awardsInput;
+                trainData.output.ap = scaledAwardPoints;
+                trainData.output.dp = scaledPoints;
+
+                trainingData.push(trainData);
+            }));
+            progress++;
+            redrawProgress();
+        }));
+        redrawProgress();
+    }
+
+    return Promise.resolve(trainingData);
+}
+
+
 
 var computePointsForTeam = function computePointsForTeam(t, districtPoints, awards){
 
     var score = 0;
-    tbaData = districtPoints["frc" + t];
+    let tbaData = districtPoints["frc" + t];
 
     if(!tbaData){
+        console.log("sad " + t);
+        console.log(districtPoints);
         return;
     }
 
@@ -132,6 +417,17 @@ var computePointsForTeam = function computePointsForTeam(t, districtPoints, awar
 
     score += robotPoints;
 
+    return score;
+}
+
+var computeAwardPointsForTeam = function computePointsForTeam(t, districtPoints, awards){
+
+    var score = 0;
+    tbaData = districtPoints["frc" + t];
+
+    if(!tbaData){
+        return;
+    }
     awardsForTeam = _.filter(awards,function(a){
         return !!_.find(a.recipient_list,function(at){
             return Number(_.replace(at.team_key,'frc','')) == t;
@@ -141,7 +437,7 @@ var computePointsForTeam = function computePointsForTeam(t, districtPoints, awar
     var awardPoints = 0;
 
     awardsForTeam.forEach(function(a){
-        points = _.find(window.awardPoints, function(ap){
+        points = _.find(window.awardPointMappings, function(ap){
             return ap.awardType == a.award_type;
         });
 
