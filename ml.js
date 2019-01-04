@@ -1,5 +1,5 @@
-window.nn = new brain.NeuralNetwork();
-window.nn2 = new brain.NeuralNetwork();
+window.nn = new brain.NeuralNetworkGPU();
+window.nn2 = new brain.NeuralNetworkGPU();
 
 var step = 0;
 var maxSteps = 0;
