@@ -1,12 +1,18 @@
-window.nn = new brain.NeuralNetworkGPU();
-window.nn2 = new brain.NeuralNetworkGPU();
+window.nn = new brain.NeuralNetwork({
+    activation: 'leaky-relu',
+    eakyReluAlpha: 0.01
+});
+window.nn2 = new brain.NeuralNetwork({
+    activation: 'leaky-relu',
+    eakyReluAlpha: 0.01
+});
 
 var step = 0;
 var maxSteps = 0;
 var progress = 0;
 var maxProgress = 0;
 
-const MAX_ITERATIONS = 20000;
+const MAX_ITERATIONS = 100000;
 
 window.train2 = async function train2(){
     let allData = [];
@@ -37,15 +43,18 @@ window.train2 = async function train2(){
 
         maxProgress = MAX_ITERATIONS;
         step++;
+        var t0 = performance.now();
         nn2.trainAsync(trainData, {
             log : async function(data){
                 fixedData = _.split(data,',');
                 thingie = _.split(fixedData[0],':')[1];
                 progress = _.trim(thingie);
-                console.log(data);
+                let t1 = performance.now();
+                console.log("current i/s :" + 100/((t1 - t0)/1000) + " data: " + data);
+                t0 = t1;
                 redrawProgress();
             },
-            logPeriod : MAX_ITERATIONS/20,
+            logPeriod : 100,
             iterations : MAX_ITERATIONS
         }).then(async res => {
             console.log(res);
@@ -56,10 +65,12 @@ window.train2 = async function train2(){
                     fixedData = _.split(data,',');
                     thingie = _.split(fixedData[0],':')[1];
                     progress = _.trim(thingie);
-                    console.log(data);
+                    let t1 = performance.now();
+                    console.log("current i/s :" + 100/((t1 - t0)/1000) + " data: " + data);
+                    t0 = t1;
                     redrawProgress();
                 },
-                logPeriod : MAX_ITERATIONS/20,
+                logPeriod : 100,
                 iterations : MAX_ITERATIONS
             }).then(async res2 =>{
                 console.log(res2);
@@ -88,7 +99,7 @@ window.train = async function train(){
                 //console.log(progress);
                 redrawProgress();
             },
-            logPeriod : MAX_ITERATIONS/20,
+            logPeriod : 100,
             iterations : MAX_ITERATIONS
         }).then(res => {
             loadData(validateYears).then(async validationTrainingData => {
@@ -104,7 +115,7 @@ window.train = async function train(){
                         //console.log(progress);
                         redrawProgress();
                     },
-                    logPeriod : MAX_ITERATIONS/20,
+                    logPeriod : 100,
                     iterations : MAX_ITERATIONS
                 }).then(res2 =>{
                     console.log(res2);
