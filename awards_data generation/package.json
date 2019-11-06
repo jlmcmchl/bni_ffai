@@ -1,0 +1,17 @@
+{
+  "name": "awards_tensorflow",
+  "version": "1.0.0",
+  "description": "Turns award history into award predictions",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jordan McMichael",
+  "license": "ISC",
+  "dependencies": {
+    "@tensorflow/tfjs": "^0.14.1",
+    "brain.js": "^1.6.1",
+    "superagent-throttle": "^0.2.5",
+    "tba-api-v3client": "^3.3.1"
+  }
+}

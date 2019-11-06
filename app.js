@@ -56,7 +56,7 @@ $(document).ready(function(){
     });
 
     $('#nn_pick_btn').click(async function(){
-        window.scoreYear(2019);
+        window.scoreYear(2020);
     });
 
     $.ajax({url : 'real_data.json', async : false}).done(function(data){
@@ -264,6 +264,7 @@ var download = function download(content, fileName, contentType) {
 }
 
 var toCSV = function toCSV(dataToTransform){
+    console.log(dataToTransform);
     const header = Object.keys(dataToTransform[0]);
     const replacer = (key, value) => value === null ? '' : value
     let csv = dataToTransform.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
